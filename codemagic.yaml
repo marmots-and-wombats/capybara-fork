@@ -1,5 +1,8 @@
 workflows:
   hooks:
+    environment:
+      groups:
+        - secure
     triggering:
       events:
         - push
