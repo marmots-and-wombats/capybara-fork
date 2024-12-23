@@ -6,9 +6,9 @@ workflows:
         - pull_request
         - pull_request_labeled      #GitHub only
         - tag
-    branch_patterns:
-      - pattern: '*'
-        include: true
-        source: true
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
     scripts:
       - printenv
