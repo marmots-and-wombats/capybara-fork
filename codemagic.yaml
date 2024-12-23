@@ -1,55 +1,14 @@
 workflows:
-  build-ios:
-    name: Build iOS
-    environment:
-      xcode: 13.3
+  hooks:
+    triggering:
+      events:
+        - push
+        - pull_request
+        - pull_request_labeled      #GitHub only
+        - tag
+    branch_patterns:
+      - pattern: '*'
+        include: true
+        source: true
     scripts:
-      - ifconfig | grep 10 | grep inet
-      - flutter packages pub get
-      - find . -name "Podfile" -execdir pod install \;
-      - flutter build ios --release --build-name=1.0.$BUILD_NUMBER --build-number=$BUILD_NUMBER --no-codesign
-    artifacts:
-      - /tmp/xcodebuild_logs/*.log
-
-  build-android:
-    name: Build Android
-    instance_type: linux
-    environment:
-      flutter: stable
-      groups:
-        - Google Play
-      android_signing:
-        - android keystore
-      vars:
-        GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_HOLDER: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-    scripts:
-      - script: |
-          source settings.env
-          echo 'GCLOUD_SERVICE_ACCOUNT_CREDENTIALS<<DELIMITER' >> $CM_ENV
-          echo "$GCLOUD_SERVICE_ACCOUNT_CREDENTIALS" >> $CM_ENV
-          echo 'DELIMITER' >> $CM_ENV
       - printenv
-      - cat $CM_ENV
-      - flutter packages pub get
-      - flutter build appbundle --release --build-number=$PROJECT_BUILD_NUMBER
-    artifacts:
-      - 'build/app/outputs/**/*.aab'
-      - 'build/app/outputs/**/*.apk'
-    publishing:
-      google_play:
-        # credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_HOLDER
-        track: alpha
-
-  empty:
-    name: Empty
-    environment:
-      xcode: 13.3
-    scripts:
-      - echo "empty"
-
-  fail-with-tests:
-    instance_type: linux_x2
-    scripts:
-      - script: wget https://raw.githubusercontent.com/testmoapp/junitxml/main/examples/junit-basic.xml
-        test_report: "$CM_BUILD_DIR/*.xml"
